@@ -15,21 +15,21 @@ import { Project } from '@/types/Project';
 import { useState } from 'react';
 import { useDispatch } from 'react-redux';
 
-const ProjectFormDialogProps = {
-
-}
-
 interface ProjectFormDialogProps {
     isOpen: boolean;
     setIsOpen: (status: boolean) => void;
 }
 
-const ProjectFormDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen }: ProjectFormDialogProps) => {
+const ProjectCreateDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen }: ProjectFormDialogProps) => {
     const dispatch = useDispatch();
 
     const [formData, setFormData] = useState({
         name: '',
         description: ''
+    });
+
+    const [errors, setErrors] = useState({
+        name: '',
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -40,16 +40,38 @@ const ProjectFormDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen
         }));
     };
 
-    const handleAddProject = () => {
+    const validateForm = () => {
+        let valid = true;
+        const newErrors = {
+            name: ''
+        };
+
+        if (!formData.name.trim()) {
+            newErrors.name = 'Name is required';
+            valid = false;
+        }
+
+        setErrors(newErrors);
+        return valid;
+    };
+
+    const handleSubmit = () => {
+        if (!validateForm()) return;
+
         const newProject: Project = {
             id: Date.now(),
             name: formData.name,
             description: formData.description,
             createdAt: new Date().toISOString(),
         };
+
         dispatch(addProject(newProject));
-        formData.name = "";
-        formData.description = "";
+
+        setFormData({
+            name: '',
+            description: '',
+        });
+
         setIsOpen(false);
     };
 
@@ -73,6 +95,7 @@ const ProjectFormDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen
                             value={formData.name}
                             onChange={handleChange}
                         />
+                        {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name}</p>}
                     </div>
                     <div>
                         <Label htmlFor="description">Description</Label>
@@ -82,7 +105,7 @@ const ProjectFormDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen
                             onChange={handleChange}
                         />
                     </div>
-                    <Button className="w-full" onClick={handleAddProject}>
+                    <Button className="w-full" onClick={handleSubmit}>
                         Create Project
                     </Button>
                 </div>
@@ -91,4 +114,4 @@ const ProjectFormDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen
     );
 };
 
-export default ProjectFormDialog;
+export default ProjectCreateDialog;
