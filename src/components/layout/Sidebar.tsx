@@ -1,7 +1,7 @@
 import { LayoutDashboard } from 'lucide-react';
 import { Project } from '@/types/Project';
 import { useState } from 'react';
-import ProjectFormDialog from '../ProjectFormDialog';
+import ProjectCreateDialog from '../ProjectCreateDialog';
 
 interface SidebarProps {
     projects: Project[];
@@ -30,7 +30,7 @@ const Sidebar: React.FC<SidebarProps> = ({ projects, selectedProject, onSelectPr
                     </button>
                 ))}
                 <div className="w-full">
-                    <ProjectFormDialog isOpen={isOpen} setIsOpen={(status) => setIsOpen(status)} />
+                    <ProjectCreateDialog isOpen={isOpen} setIsOpen={(status) => setIsOpen(status)} />
                 </div>
             </nav>
         </aside>

@@ -17,7 +17,7 @@ const App: React.FC = () => {
   const dispatch = useDispatch<AppDispatch>();
   const projects = useSelector((state: RootState) => state.project.projects);
   const selectedProject = useSelector((state: RootState) => state.project.selectedProject);
-  // const tasks = useSelector((state: RootState) => state.task.tasks);
+  const tasks = useSelector((state: RootState) => state.task.tasks);
 
   const handleSelectProject = (project: Project) => {
     dispatch(
@@ -33,7 +33,7 @@ const App: React.FC = () => {
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/projects" element={<ProjectsPage projects={projects} />} />
-          <Route path="/tasks" element={<TasksPage />} />
+          <Route path="/tasks" element={<TasksPage tasks={tasks} />} />
         </Routes>
       </main>
     </>
