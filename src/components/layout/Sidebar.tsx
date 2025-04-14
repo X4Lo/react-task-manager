@@ -1,16 +1,7 @@
-import { LayoutDashboard, Plus } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
-} from '@/components/ui/dialog';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
+import { LayoutDashboard } from 'lucide-react';
 import { Project } from '@/types/Project';
+import { useState } from 'react';
+import ProjectFormDialog from '../ProjectFormDialog';
 
 interface SidebarProps {
     projects: Project[];
@@ -19,6 +10,8 @@ interface SidebarProps {
 }
 
 const Sidebar: React.FC<SidebarProps> = ({ projects, selectedProject, onSelectProject }) => {
+    const [isOpen, setIsOpen] = useState(false);
+
     return (
         <aside className="fixed left-0 top-0 z-40 h-screen w-64 border-r bg-card lg:block">
             <div className="flex h-16 items-center border-b px-6">
@@ -36,30 +29,9 @@ const Sidebar: React.FC<SidebarProps> = ({ projects, selectedProject, onSelectPr
                         {project.name}
                     </button>
                 ))}
-                <Dialog>
-                    <DialogTrigger asChild>
-                        <Button className="w-full">
-                            <Plus className="mr-2 h-4 w-4" />
-                            New Project
-                        </Button>
-                    </DialogTrigger>
-                    <DialogContent>
-                        <DialogHeader>
-                            <DialogTitle>Create New Project</DialogTitle>
-                        </DialogHeader>
-                        <div className="space-y-4">
-                            <div>
-                                <Label htmlFor="name">Project Name</Label>
-                                <Input id="name" />
-                            </div>
-                            <div>
-                                <Label htmlFor="description">Description</Label>
-                                <Textarea id="description" />
-                            </div>
-                            <Button className="w-full">Create Project</Button>
-                        </div>
-                    </DialogContent>
-                </Dialog>
+                <div className="w-full">
+                    <ProjectFormDialog isOpen={isOpen} setIsOpen={(status) => setIsOpen(status)} />
+                </div>
             </nav>
         </aside>
     );

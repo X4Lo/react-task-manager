@@ -3,7 +3,7 @@ import { Project } from '@/types/Project';
 
 const ProjectCard: React.FC<{ project: Project }> = ({ project }) => {
     return (
-        <Card key={project.id}>
+        <Card>
             <CardHeader>
                 <CardTitle>{project.name}</CardTitle>
             </CardHeader>
