@@ -11,7 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
+import { useSelector } from 'react-redux';
 import {
     Select,
     SelectContent,
@@ -20,8 +20,9 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { Task } from '@/types/Task';
-import { addTask } from '@/store/slices/taskSlice';
+import { createNewTask } from '@/store/slices/taskSlice';
 import { RootState } from '@/store/store';
+import { useAppDispatch } from '@/store/hooks/useAppSelector';
 
 interface TaskFormDialog {
     isOpen: boolean;
@@ -29,16 +30,18 @@ interface TaskFormDialog {
 }
 
 const TaskCreateDialog: React.FC<TaskFormDialog> = ({ isOpen, setIsOpen }: TaskFormDialog) => {
-    const dispatch = useDispatch();
-    const selectedProject = useSelector((state: RootState) => state.project.selectedProject);
+    const dispatch = useAppDispatch();
+    const projects = useSelector((state: RootState) => state.project.projects);
 
     const [formData, setFormData] = useState({
+        project: undefined as string | undefined,
         title: '',
         description: '',
         priority: '' as 'low' | 'medium' | 'high' | ''
     });
 
     const [errors, setErrors] = useState({
+        project: '',
         title: '',
         priority: ''
     });
@@ -64,12 +67,31 @@ const TaskCreateDialog: React.FC<TaskFormDialog> = ({ isOpen, setIsOpen }: TaskF
         }
     };
 
+    const handleProjectChange = (value: string) => {
+        setFormData(prev => ({
+            ...prev,
+            project: value
+        }));
+        if (errors.project) {
+            setErrors(prev => ({
+                ...prev,
+                project: ''
+            }));
+        }
+    };
+
     const validateForm = () => {
         let valid = true;
         const newErrors = {
+            project: '',
             title: '',
             priority: ''
         };
+
+        if (!formData.project) {
+            newErrors.project = 'Project is required';
+            valid = false;
+        }
 
         if (!formData.title.trim()) {
             newErrors.title = 'Title is required';
@@ -85,14 +107,13 @@ const TaskCreateDialog: React.FC<TaskFormDialog> = ({ isOpen, setIsOpen }: TaskF
         return valid;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateForm()) return;
 
-        if (!selectedProject) return;
+        const projectId = parseInt(formData.project!);
 
         const newTask: Task = {
-            id: Date.now(),
-            projectId: selectedProject.id,
+            projectId: projectId,
             title: formData.title,
             description: formData.description,
             status: 'to_do',
@@ -100,9 +121,10 @@ const TaskCreateDialog: React.FC<TaskFormDialog> = ({ isOpen, setIsOpen }: TaskF
             createdAt: new Date().toISOString(),
         };
 
-        dispatch(addTask(newTask));
+        await dispatch(createNewTask(newTask)).unwrap();
 
         setFormData({
+            project: undefined,
             title: '',
             description: '',
             priority: ''
@@ -123,8 +145,25 @@ const TaskCreateDialog: React.FC<TaskFormDialog> = ({ isOpen, setIsOpen }: TaskF
                 <DialogHeader>
                     <DialogTitle>Create New Task</DialogTitle>
                 </DialogHeader>
+                <div className='w-full space-y-2'>
+                    <Label htmlFor="project">Project</Label>
+                    <Select
+                        value={formData.project}
+                        onValueChange={handleProjectChange}
+                    >
+                        <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Select project" />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {projects.map(project => (
+                                <SelectItem value={project.id!.toString()}>{project.name}</SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    {errors.priority && <p className="text-sm text-red-500 mt-1">{errors.priority}</p>}
+                </div>
                 <div className="space-y-4">
-                    <div>
+                    <div className="space-y-2">
                         <Label htmlFor="title">Title</Label>
                         <Input id="title"
                             value={formData.title}
@@ -132,20 +171,20 @@ const TaskCreateDialog: React.FC<TaskFormDialog> = ({ isOpen, setIsOpen }: TaskF
                         />
                         {errors.title && <p className="text-sm text-red-500 mt-1">{errors.title}</p>}
                     </div>
-                    <div>
+                    <div className='space-y-2'>
                         <Label htmlFor="description">Description</Label>
                         <Textarea id="description"
                             value={formData.description}
                             onChange={handleChange}
                         />
                     </div>
-                    <div className='w-full'>
+                    <div className='w-full space-y-2'>
                         <Label htmlFor="priority">Priority</Label>
                         <Select
                             value={formData.priority}
                             onValueChange={handlePriorityChange}
                         >
-                            <SelectTrigger>
+                            <SelectTrigger className="w-full">
                                 <SelectValue placeholder="Select priority" />
                             </SelectTrigger>
                             <SelectContent>
