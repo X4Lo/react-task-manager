@@ -10,10 +10,10 @@ import {
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { addProject } from '@/store/slices/projectSlice';
 import { Project } from '@/types/Project';
 import { useState } from 'react';
-import { useDispatch } from 'react-redux';
+import { useAppDispatch } from '@/store/hooks/useAppSelector';
+import { createNewProject } from '@/store/slices/projectSlice';
 
 interface ProjectFormDialogProps {
     isOpen: boolean;
@@ -21,7 +21,7 @@ interface ProjectFormDialogProps {
 }
 
 const ProjectCreateDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOpen }: ProjectFormDialogProps) => {
-    const dispatch = useDispatch();
+    const dispatch = useAppDispatch();
 
     const [formData, setFormData] = useState({
         name: '',
@@ -55,7 +55,7 @@ const ProjectCreateDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOp
         return valid;
     };
 
-    const handleSubmit = () => {
+    const handleSubmit = async () => {
         if (!validateForm()) return;
 
         const newProject: Project = {
@@ -65,7 +65,7 @@ const ProjectCreateDialog: React.FC<ProjectFormDialogProps> = ({ isOpen, setIsOp
             createdAt: new Date().toISOString(),
         };
 
-        dispatch(addProject(newProject));
+        await dispatch(createNewProject(newProject)).unwrap();
 
         setFormData({
             name: '',
